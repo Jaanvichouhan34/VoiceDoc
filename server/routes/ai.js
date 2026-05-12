@@ -13,7 +13,7 @@ router.post('/analyze', auth, async (req, res) => {
     if (process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
       const Groq = require('groq-sdk');
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-      const prompt = `You are a medical scribe assistant. Extract structured information from this doctor's spoken consultation transcript. Return ONLY a JSON object with these fields: { "symptoms": [], "diagnosis": "string", "medicines": [{ "name": "string", "dosage": "string", "duration": "string" }], "advice": "string", "followUpDate": "string" }. IMPORTANT: The transcript may be in Hindi, but the values in the JSON object must ALWAYS be in English for clinical documentation. Transcript: ${transcript}`;
+      const prompt = `You are a medical scribe assistant. Extract structured information from this doctor's spoken consultation transcript. Return ONLY a JSON object with these fields: { "symptoms": [], "diagnosis": "string", "medicines": [{ "name": "string", "dosage": "string", "duration": "string" }], "advice": "string", "followUpDate": "string", "vitals": { "bloodPressure": "string", "heartRate": 0, "temperature": 0, "weight": 0 } }. Extract vitals if mentioned (e.g., blood pressure, pulse/heart rate, temperature, weight). If a vital is not mentioned, use null or omit it. IMPORTANT: The transcript may be in Hindi, but the values in the JSON object must ALWAYS be in English for clinical documentation. Transcript: ${transcript}`;
       
       const completion = await groq.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
@@ -59,6 +59,16 @@ router.post('/analyze', auth, async (req, res) => {
               followUpDate: {
                 type: "STRING",
                 description: "Recommended follow-up date or timeframe."
+              },
+              vitals: {
+                type: "OBJECT",
+                properties: {
+                  bloodPressure: { type: "STRING", description: "Blood pressure (e.g., 120/80)." },
+                  heartRate: { type: "NUMBER", description: "Heart rate in bpm." },
+                  temperature: { type: "NUMBER", description: "Temperature in Fahrenheit or Celsius." },
+                  weight: { type: "NUMBER", description: "Weight in kg or lbs." }
+                },
+                description: "Vitals extracted from the consultation."
               }
             },
             required: ["symptoms", "diagnosis", "medicines", "advice"]
@@ -130,17 +140,23 @@ router.post('/suggest', auth, async (req, res) => {
     }
 
     let cleanText = resultText;
-    if (cleanText.includes('```')) {
+    
+    // Try to extract JSON array if present
+    const arrayMatch = cleanText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (arrayMatch) {
+      cleanText = arrayMatch[0];
+    } else if (cleanText.includes('```')) {
       const match = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (match) {
         cleanText = match[1];
       }
     }
+    
     const parsedData = JSON.parse(cleanText.trim());
     res.json(parsedData);
   } catch (error) {
     console.error('AI Suggest Error:', error);
-    res.status(500).json({ error: 'Failed to get suggestions' });
+    res.status(500).json({ error: `Failed to get suggestions: ${error.message}` });
   }
 });
 

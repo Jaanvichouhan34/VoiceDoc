@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import LegalPage from './pages/LegalPage';
 import HowItWorks from './pages/HowItWorks';
 import FAQPage from './pages/FAQPage';
+import PatientTrends from './pages/PatientTrends';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/new-consultation" element={<ProtectedRoute><NewConsultation /></ProtectedRoute>} />
               <Route path="/patient/:name" element={<ProtectedRoute><PatientHistory /></ProtectedRoute>} />
+              <Route path="/patient-trends/:name" element={<ProtectedRoute><PatientTrends /></ProtectedRoute>} />
               <Route path="/privacy" element={<LegalPage />} />
               <Route path="/terms" element={<LegalPage />} />
               <Route path="/cookies" element={<LegalPage />} />

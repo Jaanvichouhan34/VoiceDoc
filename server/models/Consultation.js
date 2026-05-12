@@ -11,6 +11,12 @@ const consultationSchema = new mongoose.Schema({
   patientName: { type: String, required: true },
   patientAge: { type: Number, required: true },
   patientGender: { type: String, required: true },
+  vitals: {
+    bloodPressure: String,
+    heartRate: Number,
+    temperature: Number,
+    weight: Number
+  },
   symptoms: [String],
   diagnosis: String,
   medicines: [medicineSchema],

@@ -42,4 +42,17 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// Get trends for a specific patient
+router.get('/patient/:name', auth, async (req, res) => {
+  try {
+    const consultations = await Consultation.find({ 
+      doctor: req.user.id,
+      patientName: req.params.name
+    }).sort({ createdAt: 1 });
+    res.json(consultations);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

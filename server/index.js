@@ -17,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/consultations', require('./routes/consultations'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/audio', require('./routes/audio'));
 
 // Connect to MongoDB
 const PORT = process.env.PORT || 5000;

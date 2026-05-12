@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Stethoscope, Menu, X } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
 
 const LandingNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const links = [
     { name: 'Home', href: '/#home' },
@@ -36,12 +38,25 @@ const LandingNavbar = () => {
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <Link to="/login" className="text-white border border-[#374151] px-5 py-2 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
-                Login
-              </Link>
-              <Link to="/login" className="vd-btn-gradient px-6 py-2 font-medium">
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" className="text-white border border-[#374151] px-5 py-2 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
+                    Dashboard
+                  </Link>
+                  <button onClick={logout} className="vd-btn-gradient px-6 py-2 font-medium">
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="text-white border border-[#374151] px-5 py-2 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
+                    Login
+                  </Link>
+                  <Link to="/login" className="vd-btn-gradient px-6 py-2 font-medium">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -69,12 +84,25 @@ const LandingNavbar = () => {
               </a>
             ))}
             <div className="pt-4 flex flex-col gap-3">
-              <Link to="/login" className="w-full text-white border border-[#374151] px-5 py-3 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
-                Login
-              </Link>
-              <Link to="/login" className="w-full vd-btn-gradient px-6 py-3 font-medium">
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setIsOpen(false)} className="w-full text-white border border-[#374151] px-5 py-3 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
+                    Dashboard
+                  </Link>
+                  <button onClick={() => { logout(); setIsOpen(false); }} className="w-full vd-btn-gradient px-6 py-3 font-medium">
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsOpen(false)} className="w-full text-white border border-[#374151] px-5 py-3 rounded-lg hover:bg-[#1f2937] transition-colors font-medium">
+                    Login
+                  </Link>
+                  <Link to="/login" onClick={() => setIsOpen(false)} className="w-full vd-btn-gradient px-6 py-3 font-medium">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

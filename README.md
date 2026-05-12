@@ -83,6 +83,18 @@ npm run dev
 
 ---
 
+## 🗺️ Future Roadmap
+
+- 📱 **WhatsApp Integration**: Automatically send PDF prescriptions to patients via WhatsApp Business API.
+- 📊 **Advanced EHR & Patient Trends**: Visualize patient health metrics (vitals, symptoms) over time with interactive charts.
+- 🎙️ **Audio File Upload**: Support for processing pre-recorded audio dictations.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
 ## 🏆 Project Status
 
 This project was built with **extreme attention to detail** and is ready for production scaling. It demonstrates high-fidelity UI/UX, advanced AI integration, and a robust full-stack architecture.

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, FileText, PlusCircle, Calendar, Search, ArrowRight, ChevronRight } from 'lucide-react';
+import { Users, FileText, PlusCircle, Calendar, Search, ArrowRight, ChevronRight, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const Dashboard = () => {
@@ -206,6 +206,16 @@ const Dashboard = () => {
                   <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium truncate max-w-[200px] border border-secondary/20">
                     {consult.diagnosis || 'Pending Diagnosis'}
                   </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/patient-trends/${encodeURIComponent(consult.patientName)}`);
+                    }}
+                    className="p-2 hover:bg-[#374151] rounded-full text-[#9ca3af] hover:text-white transition-colors"
+                    title="View Trends"
+                  >
+                    <Activity className="h-5 w-5" />
+                  </button>
                   <ChevronRight className="h-5 w-5 text-[#9ca3af] group-hover:text-white transition-colors" />
                 </div>
               </div>

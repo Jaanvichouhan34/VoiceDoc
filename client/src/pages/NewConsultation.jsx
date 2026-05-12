@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { generatePrescription } from '../utils/pdfGenerator';
 import { startRecognition, stopRecognition } from '../utils/speech';
-import { Mic, MicOff, BrainCircuit, FileDown, Save, CheckCircle2, AlertCircle, X, Plus } from 'lucide-react';
+import { Mic, MicOff, BrainCircuit, FileDown, Save, CheckCircle2, AlertCircle, X, Plus, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const NewConsultation = () => {
@@ -23,6 +23,7 @@ const NewConsultation = () => {
   const [aiSuggestions, setAiSuggestions] = useState(null);
   
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   const toggleRecording = () => {
     if (isRecording) {
@@ -31,6 +32,28 @@ const NewConsultation = () => {
     } else {
       startRecognition((text) => setTranscript(text), language);
       setIsRecording(true);
+    }
+  };
+
+  const handleAudioUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('audio', file);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/audio/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setTranscript(res.data.transcript);
+      alert('Audio transcribed successfully!');
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to transcribe audio: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -57,7 +80,7 @@ const NewConsultation = () => {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/ai/suggest`, { symptoms });
       setAiSuggestions(res.data);
     } catch (err) {
-      console.error('Failed to get suggestions', err);
+      console.error('Failed to get suggestions:', err.response?.data?.error || err.message);
     } finally {
       setSuggesting(false);
     }
@@ -74,7 +97,7 @@ const NewConsultation = () => {
       };
       await axios.post(`${import.meta.env.VITE_API_URL}/consultations`, payload);
       alert('Record saved successfully!');
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       alert('Failed to save record');
@@ -168,7 +191,22 @@ const NewConsultation = () => {
               {isRecording ? 'Listening... click to stop' : 'Click to start recording'}
             </p>
 
+            <div className="flex justify-center mb-4">
+              <label className="cursor-pointer bg-[#1f2937] hover:bg-[#374151] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                {uploading ? 'Transcribing...' : 'Upload Audio File'}
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="audio/*"
+                  onChange={(e) => handleAudioUpload(e.target.files[0])}
+                  disabled={uploading}
+                />
+              </label>
+            </div>
+
             <textarea 
+
               value={transcript}
               onChange={e => setTranscript(e.target.value)}
               placeholder="Live transcript will appear here..."
@@ -235,6 +273,64 @@ const NewConsultation = () => {
                         }
                       }}
                     />
+                  </div>
+                </div>
+
+                <div className="border-l-[3px] border-blue-500 pl-4">
+                  <h3 className="text-sm font-bold text-[#9ca3af] uppercase tracking-wider mb-2">Vitals</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">BP</label>
+                      <input 
+                        type="text" 
+                        value={structuredData.vitals?.bloodPressure || ''}
+                        onChange={(e) => setStructuredData({ 
+                          ...structuredData, 
+                          vitals: { ...(structuredData.vitals || {}), bloodPressure: e.target.value } 
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="120/80"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">Heart Rate</label>
+                      <input 
+                        type="number" 
+                        value={structuredData.vitals?.heartRate || ''}
+                        onChange={(e) => setStructuredData({ 
+                          ...structuredData, 
+                          vitals: { ...(structuredData.vitals || {}), heartRate: e.target.value } 
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="72"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">Temp (°F)</label>
+                      <input 
+                        type="number" 
+                        value={structuredData.vitals?.temperature || ''}
+                        onChange={(e) => setStructuredData({ 
+                          ...structuredData, 
+                          vitals: { ...(structuredData.vitals || {}), temperature: e.target.value } 
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="98.6"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">Weight (kg)</label>
+                      <input 
+                        type="number" 
+                        value={structuredData.vitals?.weight || ''}
+                        onChange={(e) => setStructuredData({ 
+                          ...structuredData, 
+                          vitals: { ...(structuredData.vitals || {}), weight: e.target.value } 
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="70"
+                      />
+                    </div>
                   </div>
                 </div>
 
