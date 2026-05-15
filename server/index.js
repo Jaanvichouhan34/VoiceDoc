@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: true,
+  origin: "https://voice-doc-three.vercel.app",
   credentials: true
 }));
 app.use(express.json());

@@ -43,6 +43,8 @@ Medical burnout is at an all-time high. Doctors spend up to **50% of their day**
 - 🌓 **Dynamic Theme System**: Premium dark mode and high-contrast light mode.
 - 🔍 **Debounced Live Search**: Find any patient record instantly among thousands.
 - 🔒 **Privacy First**: Secure, encrypted storage of sensitive clinical data.
+- 📊 **Advanced EHR & Patient Trends**: Visualize patient health metrics (vitals, symptoms) over time with interactive charts.
+- 🎙️ **Audio File Upload**: Support for processing pre-recorded audio dictations.
 
 ---
 
@@ -86,8 +88,6 @@ npm run dev
 ## 🗺️ Future Roadmap
 
 - 📱 **WhatsApp Integration**: Automatically send PDF prescriptions to patients via WhatsApp Business API.
-- 📊 **Advanced EHR & Patient Trends**: Visualize patient health metrics (vitals, symptoms) over time with interactive charts.
-- 🎙️ **Audio File Upload**: Support for processing pre-recorded audio dictations.
 
 ## 📄 License
 
