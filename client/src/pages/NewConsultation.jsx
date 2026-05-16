@@ -7,6 +7,8 @@ import { startRecognition, stopRecognition } from '../utils/speech';
 import { Mic, MicOff, BrainCircuit, FileDown, Save, CheckCircle2, AlertCircle, X, Plus, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+
 const NewConsultation = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -42,7 +44,7 @@ const NewConsultation = () => {
     formData.append('audio', file);
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/audio/upload`, formData, {
+      const res = await axios.post(`${API_BASE_URL}/audio/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -61,7 +63,7 @@ const NewConsultation = () => {
     if (!transcript.trim()) return;
     setAnalyzing(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/ai/analyze`, { transcript });
+      const res = await axios.post(`${API_BASE_URL}/ai/analyze`, { transcript });
       setStructuredData(res.data);
       if (res.data.symptoms && res.data.symptoms.length > 0) {
         getAiSuggestions(res.data.symptoms);
@@ -77,7 +79,7 @@ const NewConsultation = () => {
   const getAiSuggestions = async (symptoms) => {
     setSuggesting(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/ai/suggest`, { symptoms });
+      const res = await axios.post(`${API_BASE_URL}/ai/suggest`, { symptoms });
       setAiSuggestions(res.data);
     } catch (err) {
       console.error('Failed to get suggestions:', err.response?.data?.error || err.message);
@@ -95,7 +97,7 @@ const NewConsultation = () => {
         ...structuredData,
         transcript
       };
-      await axios.post(`${import.meta.env.VITE_API_URL}/consultations`, payload);
+      await axios.post(`${API_BASE_URL}/consultations`, payload);
       alert('Record saved successfully!');
       navigate('/dashboard');
     } catch (err) {

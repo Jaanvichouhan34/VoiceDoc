@@ -4,6 +4,8 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Activity, Heart, Thermometer, Scale } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+
 const PatientTrends = () => {
   const { name } = useParams();
   const [data, setData] = useState([]);
@@ -12,7 +14,7 @@ const PatientTrends = () => {
   useEffect(() => {
     const fetchTrends = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/consultations/patient/${name}`);
+        const res = await axios.get(`${API_BASE_URL}/consultations/patient/${name}`);
         // Format data for charts
         const formattedData = res.data.map(item => ({
           date: new Date(item.createdAt).toLocaleDateString(),

@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Clock, Activity, Pill, User } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+
 const PatientHistory = () => {
   const { name } = useParams();
   const [consultations, setConsultations] = useState([]);
@@ -11,7 +13,7 @@ const PatientHistory = () => {
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/consultations/search?q=${encodeURIComponent(name)}`);
+        const res = await axios.get(`${API_BASE_URL}/consultations/search?q=${encodeURIComponent(name)}`);
         const exactMatches = res.data.filter(c => c.patientName === name);
         setConsultations(exactMatches);
       } catch (err) {

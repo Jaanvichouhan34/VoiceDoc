@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Users, FileText, PlusCircle, Calendar, Search, ArrowRight, ChevronRight, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+
 const Dashboard = () => {
   const [consultations, setConsultations] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +18,7 @@ const Dashboard = () => {
 
   const fetchConsultations = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/consultations`);
+      const res = await axios.get(`${API_BASE_URL}/consultations`);
       setConsultations(res.data);
       setLoading(false);
     } catch (err) {
@@ -41,7 +43,7 @@ const Dashboard = () => {
   const performSearch = async (query) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/consultations/search?q=${query}`);
+      const res = await axios.get(`${API_BASE_URL}/consultations/search?q=${query}`);
       setConsultations(res.data);
       setLoading(false);
     } catch (err) {

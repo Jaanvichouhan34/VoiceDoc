@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -26,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+    const res = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
     setToken(res.data.token);
     setUser(res.data.doctor);
     localStorage.setItem('token', res.data.token);
@@ -34,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, userData);
+    const res = await axios.post(`${API_BASE_URL}/auth/register`, userData);
     setToken(res.data.token);
     setUser(res.data.doctor);
     localStorage.setItem('token', res.data.token);
