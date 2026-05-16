@@ -7,7 +7,7 @@ import { startRecognition, stopRecognition } from '../utils/speech';
 import { Mic, MicOff, BrainCircuit, FileDown, Save, CheckCircle2, AlertCircle, X, Plus, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com/api";
 
 const NewConsultation = () => {
   const { user } = useAuth();
