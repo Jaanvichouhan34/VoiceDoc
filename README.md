@@ -1,5 +1,5 @@
 ......
-.
+..
 
 # VoiceDoc - AI Medical Scribe 🩺
 
