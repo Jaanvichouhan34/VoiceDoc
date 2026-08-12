@@ -9,19 +9,18 @@
 
 ---
 
-## 📸 visual Tour
+## 📸 Visual Tour
 
-### 🖥️ The Doctor's Dashboard
-A premium, dark-themed command center with real-time analytics, consultation trends, and a quick-access patient list.
-![VoiceDoc Dashboard](client/public/dashboard_mockup.png)
+<div align="center">
+  <img src="client/public/banner.png" alt="VoiceDoc Banner" width="100%" />
+</div>
 
-### 🧠 Intelligent AI Structuring
-Our advanced AI pipeline extracts symptoms, diagnoses, and medicines from natural conversation instantly.
-![AI Analysis](client/public/ai_analysis_mockup.png)
+<br/>
 
-### 📱 Mobile Ready
-A fully responsive design ensuring doctors can access and record consultations on any device.
-![Mobile View](client/public/mobile_view_mockup.png)
+<div align="center">
+  <img src="client/public/voicedoc%201.png" width="48%" />
+  <img src="client/public/voicedoc2.png" width="48%" />
+</div>
 
 ---
 
