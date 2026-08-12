@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 const HeroSection = () => {
   const { user } = useAuth();
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#0a0f1e]">
+    <section id="home" className="relative pt-32 lg:pt-40 pb-20 overflow-hidden bg-[#0a0f1e]">
       <div className="animated-bg"></div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
