@@ -44,9 +44,11 @@ VoiceDoc is a **production-level, AI-powered medical scribe** that revolutionize
 ### Interface Previews
 
 <div align="center">
-  <img src="client/public/voicedoc%201.png" alt="VoiceDoc Interface 1" width="400" />
+  <img src="client/public/voicedoc%201.png" alt="VoiceDoc Dashboard" width="250" />
   &nbsp;&nbsp;
-  <img src="client/public/voicedoc2.png" alt="VoiceDoc Interface 2" width="400" />
+  <img src="client/public/voicedoc2.png" alt="AI Analysis" width="250" />
+  &nbsp;&nbsp;
+  <img src="client/public/prescription.png" alt="Generated Prescription" width="250" />
 </div>
 <br/>
 
