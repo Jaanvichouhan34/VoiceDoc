@@ -1,5 +1,4 @@
 
-
 <div align="center">
 
 <img src="client/public/banner.png" alt="VoiceDoc Banner" width="800" />
