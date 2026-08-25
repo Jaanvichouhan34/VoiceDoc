@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Stethoscope, Menu, X } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 import { useAuth } from '../../context/AuthContext';
@@ -7,21 +7,26 @@ import { useAuth } from '../../context/AuthContext';
 const LandingNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const location = useLocation();
+
+  const getHref = (id) => {
+    return location.pathname === '/' ? `#${id}` : `/#${id}`;
+  };
 
   const links = [
-    { name: 'Home', href: '/#home' },
-    { name: 'About', href: '/#about' },
-    { name: 'Features', href: '/#features' },
-    { name: 'Help', href: '/#help' },
-    { name: 'Contact', href: '/#contact' },
+    { name: 'Home', href: getHref('home') },
+    { name: 'About', href: getHref('about') },
+    { name: 'Features', href: getHref('features') },
+    { name: 'Help', href: getHref('help') },
+    { name: 'Contact', href: getHref('contact') },
   ];
 
   return (
-    <nav className="landing-navbar fixed w-full z-50 bg-[#0d1424]/90 backdrop-blur-md border-b border-[#1f2937] transition-all">
+    <nav className="landing-navbar fixed top-0 left-0 right-0 z-50 bg-[#0d1424]/95 backdrop-blur-md border-b border-[#1f2937] shadow-xl transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
-            <a href="#home" className="flex items-center gap-2">
+            <a href={getHref('home')} className="flex items-center gap-2">
               <Stethoscope className="h-8 w-8 text-primary animate-pulse-icon" />
               <span className="font-bold text-2xl tracking-tight text-white">VoiceDoc</span>
             </a>
