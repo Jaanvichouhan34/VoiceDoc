@@ -8,21 +8,23 @@ router.post('/analyze', auth, async (req, res) => {
     const { transcript } = req.body;
     
     let resultText = '';
+    const hasGroq = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim());
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
 
     // Trying Groq first if key exists, else Gemini
-    if (process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
+    if (hasGroq) {
       const Groq = require('groq-sdk');
-      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY.trim() });
       const prompt = `You are a medical scribe assistant. Extract structured information from this doctor's spoken consultation transcript. Return ONLY a JSON object with these fields: { "symptoms": [], "diagnosis": "string", "medicines": [{ "name": "string", "dosage": "string", "duration": "string" }], "advice": "string", "followUpDate": "string", "vitals": { "bloodPressure": "string", "heartRate": 0, "temperature": 0, "weight": 0 } }. Extract vitals if mentioned (e.g., blood pressure, pulse/heart rate, temperature, weight). If a vital is not mentioned, use null or omit it. IMPORTANT: The transcript may be in Hindi, but the values in the JSON object must ALWAYS be in English for clinical documentation. Transcript: ${transcript}`;
       
       const completion = await groq.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
-        model: 'llama-3.3-70b-versatile',
+        model: 'groq/compound',
         temperature: 0,
       });
       resultText = completion.choices[0]?.message?.content || '{}';
-    } else if (process.env.GEMINI_API_KEY) {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    } else if (hasGemini) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-pro",
         generationConfig: {
@@ -80,21 +82,19 @@ router.post('/analyze', auth, async (req, res) => {
       const response = await result.response;
       resultText = response.text();
     } else {
-      return res.status(400).json({ error: 'No AI API Key provided in environment' });
+      return res.status(400).json({ error: 'No AI API Key provided in server environment' });
     }
 
     let cleanText = resultText;
-    if (cleanText.includes('```')) {
-      const match = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (match) {
-        cleanText = match[1];
-      }
+    const jsonObjectMatch = cleanText.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      cleanText = jsonObjectMatch[0];
     }
     const parsedData = JSON.parse(cleanText.trim());
     res.json(parsedData);
   } catch (error) {
     console.error('AI Analysis Error:', error);
-    res.status(500).json({ error: 'Failed to analyze transcript' });
+    res.status(500).json({ error: error.message || 'Failed to analyze transcript' });
   }
 });
 
@@ -102,19 +102,21 @@ router.post('/suggest', auth, async (req, res) => {
   try {
     const { symptoms } = req.body;
     let resultText = '';
+    const hasGroq = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim());
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
     const prompt = `Based on these symptoms in a clinical context: ${JSON.stringify(symptoms)}, list 3 possible diagnoses with brief reasoning. Add disclaimer that this is AI assistance only, not a replacement for clinical judgment. Return ONLY a JSON array of objects with fields: { "name": "string", "reasoning": "string" }.`;
 
-    if (process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
+    if (hasGroq) {
       const Groq = require('groq-sdk');
-      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY.trim() });
       const completion = await groq.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
-        model: 'llama-3.3-70b-versatile',
+        model: 'groq/compound',
         temperature: 0.2,
       });
       resultText = completion.choices[0]?.message?.content || '[]';
-    } else if (process.env.GEMINI_API_KEY) {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    } else if (hasGemini) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-pro",
         generationConfig: {
@@ -142,14 +144,9 @@ router.post('/suggest', auth, async (req, res) => {
     let cleanText = resultText;
     
     // Try to extract JSON array if present
-    const arrayMatch = cleanText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
     if (arrayMatch) {
       cleanText = arrayMatch[0];
-    } else if (cleanText.includes('```')) {
-      const match = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (match) {
-        cleanText = match[1];
-      }
     }
     
     const parsedData = JSON.parse(cleanText.trim());
