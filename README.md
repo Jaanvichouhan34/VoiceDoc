@@ -1,4 +1,3 @@
-
 <div align="center">
 
 <img src="client/public/banner.png" alt="VoiceDoc Banner" width="800" />
@@ -13,7 +12,7 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js_18-339933?style=flat-square&logo=nodedotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React+Vite-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-![Groq](https://img.shields.io/badge/AI-Groq%20Llama3-orange?style=flat-square)
+![Groq](https://img.shields.io/badge/AI-Groq%20Compound-orange?style=flat-square)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)
 
@@ -28,9 +27,8 @@
   ╚═══╝   ╚═════╝ ╚═╝ ╚═════╝╚══════╝╚═════╝  ╚═════╝  ╚═════╝
 ```
 
-> **The AI Medical Scribe Built for India's Doctors.**
-> Speak in Hindi or English. VoiceDoc transcribes, structures, 
-> and generates prescriptions instantly. Spend time with patients, not paperwork.
+> **The Production AI Medical Scribe & EMR System for Doctors.**
+> Speak in Hindi, English, or Hinglish. VoiceDoc transcribes, separates speaker turns, structures medical data, and generates official prescriptions & clinical reports instantly.
 
 <br/>
 
@@ -40,7 +38,7 @@
 
 ## 🧠 What is VoiceDoc?
 
-VoiceDoc is a **production-level, AI-powered medical scribe** that revolutionizes clinical documentation. It listens to clinical consultations in real-time, supports seamless code-switching between **Hindi and English (Hinglish)**, and automatically generates structured clinical notes and prescriptions.
+VoiceDoc is a **production-ready AI medical scribe and EMR system** that revolutionizes clinical documentation. It listens to clinical consultations in real-time, supports code-switching between **Hindi and English (Hinglish)**, automatically labels **Doctor vs Patient** speaker turns, enforces mandatory doctor verification, and generates ready-to-print prescription PDFs and full encounter reports.
 
 ### Interface Previews
 
@@ -57,44 +55,60 @@ VoiceDoc is a **production-level, AI-powered medical scribe** that revolutionize
 <tr>
 <td width="33%" align="center">
 <br/>
-🎙️<br/><b>Voice First</b><br/>
-<sub>Speak naturally in Hinglish.<br/>VoiceDoc listens and understands.</sub>
+🎙️<br/><b>Bilingual Voice Scribe</b><br/>
+<sub>Speak naturally in Hinglish.<br/>VoiceDoc transcribes and structures.</sub>
 <br/><br/>
 </td>
 <td width="33%" align="center">
 <br/>
-🧠<br/><b>Intelligent Structuring</b><br/>
-<sub>Extracts symptoms, diagnoses,<br/>and medicines instantly.</sub>
+💬<br/><b>Speaker Diarization</b><br/>
+<sub>Auto-labels Doctor 💙 & Patient 💚<br/>conversation turns.</sub>
 <br/><br/>
 </td>
 <td width="33%" align="center">
 <br/>
-💊<br/><b>Smart Prescriptions</b><br/>
-<sub>One-click PDF generation<br/>with dynamic tables.</sub>
+🛡️<br/><b>Doctor Safety Gating</b><br/>
+<sub>Mandatory doctor verification<br/>before saving or exporting.</sub>
 <br/><br/>
 </td>
 </tr>
 <tr>
 <td width="33%" align="center">
 <br/>
-🌓<br/><b>Dynamic Themes</b><br/>
-<sub>Premium dark mode and<br/>high-contrast light mode.</sub>
+📄<br/><b>Dual PDF Reports</b><br/>
+<sub>Generate compact Rx PDFs<br/>or full Encounter Reports.</sub>
 <br/><br/>
 </td>
 <td width="33%" align="center">
 <br/>
-📊<br/><b>Patient Trends (EHR)</b><br/>
-<sub>Visualize health metrics<br/>over time with charts.</sub>
+📑<br/><b>Master EMR History</b><br/>
+<sub>Search & filter past sessions<br/>by patient name, diagnosis, or date.</sub>
 <br/><br/>
 </td>
 <td width="33%" align="center">
 <br/>
-🔒<br/><b>Privacy First</b><br/>
-<sub>Secure, encrypted storage<br/>of sensitive clinical data.</sub>
+👍<br/><b>AI Clinical Accuracy</b><br/>
+<sub>Real-time thumbs up/down doctor<br/>ratings tracked in MongoDB.</sub>
 <br/><br/>
 </td>
 </tr>
 </table>
+
+---
+
+## ✨ Key Features & Capabilities
+
+- 🎙️ **Bilingual Speech Capture**: Seamless real-time speech recognition for Hindi, English, and Hinglish.
+- 💬 **Smart Speaker Diarization**: Auto-formats unbroken transcripts into color-coded **Doctor** (Blue) and **Patient** (Emerald) dialogue bubbles.
+- 🧠 **AI Clinical Extraction**: Extracts Symptoms, Vitals (BP, HR, Temp, Weight), Diagnosis, Medicine table, and Advice using `groq/compound` LLM.
+- 🔒 **Clinical Verification Gating**: Explicit doctor review checkbox gating record saving and PDF generation for patient safety.
+- 📑 **Master Consultation History (`/consultations`)**: Searchable, filterable log of all clinical sessions across all patients.
+- 📄 **Dual PDF Generation**:
+  - **Rx Prescription PDF**: Compact, doctor-signed prescription sheet.
+  - **Full Encounter Report PDF**: Comprehensive report containing transcript log, vitals, diagnosis, Rx table, and instructions.
+- 📊 **Patient Health Trends (`recharts`)**: Visualizes historical vitals (BP, Heart Rate, Temperature, Weight) across past patient visits.
+- 👍 **AI Clinical Accuracy Feedback**: Real-time doctor rating system (`Thumbs Up`/`Thumbs Down`) connected to MongoDB, displaying live accuracy % stats on the Doctor Dashboard.
+- ⚡ **Inline Error Recovery**: Displays friendly inline error banners with 1-click **Retry** mechanics if AI endpoints time out or fail.
 
 ---
 
@@ -103,39 +117,36 @@ VoiceDoc is a **production-level, AI-powered medical scribe** that revolutionize
 | Feature | Other Medical Scribes | **VoiceDoc** |
 |---------|-----------------------|--------------|
 | Language Support | ❌ English only | ✅ Fluent in Hinglish (Hindi + English) |
-| Prescriptions | ❌ Manual typing | ✅ Auto-generates ready-to-print PDFs |
-| Time spent | ❌ 50% of the day on docs | ✅ Documentation finishes with the consultation |
-| Theme System | ❌ Boring clinical white | ✅ Beautiful Dark Mode & Light Mode |
-| Patient Search | ❌ Slow page reloads | ✅ Debounced, instant live search |
-
-> VoiceDoc is designed for **fast-paced Indian clinics** where consultations happen in mixed languages and doctors need to focus on the patient, not the screen.
+| Speaker Diarization | ❌ Unbroken text wall | ✅ Color-coded Doctor 💙 vs Patient 💚 turns |
+| Doctor Verification Gating | ❌ Auto-exports unverified AI output | ✅ Mandatory doctor review check before export |
+| Prescriptions & Reports | ❌ Basic text snippet | ✅ Dual vector PDFs (Rx & Full Encounter Report) |
+| Master EMR History | ❌ Scattered notes | ✅ Full searchable & filterable EMR history |
+| AI Accuracy Tracking | ❌ Untracked guesswork | ✅ Live doctor rating feedback & accuracy % |
 
 ---
 
 ## 🛠️ Tech Stack
 
-### ⚛️ React + Vite — Web Dashboard
-
-> Fast, component-based UI designed with extreme attention to detail and a premium aesthetic.
-
+### ⚛️ Frontend — React + Vite
 | Tool | Role |
 |------|------|
-| `React` | Component-based UI |
-| `Vite` | Lightning-fast dev server |
-| `Tailwind CSS` | Utility-first styling & responsiveness |
+| `React` | Component-based UI framework |
+| `Vite` | High-speed frontend build tool & dev server |
+| `Tailwind CSS` | Utility-first styling & dark mode system |
 | `Framer Motion` | Smooth animations & transitions |
-| `Web Speech API` | Browser-native real-time voice capture |
+| `jsPDF` & `jspdf-autotable` | Client-side vector PDF report generation |
+| `Recharts` | Interactive vitals analytics & trends |
+| `Lucide Icons` | Modern SVG iconography |
+| `Web Speech API` | Real-time browser speech recognition |
 
-### ⚙️ Node.js + Express — API Backend
-
-> Acts as the bridge between the UI and AI, handling data structuring, authentication, and PDF generation.
-
+### ⚙️ Backend — Node.js + Express
 | Package | Role |
 |---------|------|
-| `express` | REST API server |
-| `mongoose` | MongoDB database ODM |
-| `groq-sdk` / `@google/generative-ai` | High-speed AI extraction pipeline |
-| `jsonwebtoken` | Secure user authentication |
+| `express` | RESTful API web server |
+| `mongoose` | MongoDB schema modelling |
+| `groq-sdk` / `@google/generative-ai` | AI clinical extraction pipeline (`groq/compound`) |
+| `jsonwebtoken` & `bcryptjs` | Secure doctor authentication & password hashing |
+| `cors` | Cross-Origin Resource Sharing middleware |
 
 ---
 
@@ -143,19 +154,20 @@ VoiceDoc is a **production-level, AI-powered medical scribe** that revolutionize
 
 ```
 VoiceDoc/
-├── server/                    # ⚙️ Node.js + Express API
-│   ├── index.js               # Main server entry
-│   ├── routes/                # API route handlers (auth, ai, consultations)
-│   ├── models/                # MongoDB database schemas
-│   ├── middleware/            # JWT Auth middleware
+├── server/                    # ⚙️ Node.js + Express API Backend
+│   ├── index.js               # Main server entry & route mounting
+│   ├── routes/                # API routes (auth, ai, consultations, feedback, audio)
+│   ├── models/                # MongoDB models (Doctor, Consultation, Feedback)
+│   ├── middleware/            # JWT authentication middleware
 │   └── package.json
 │
-├── client/                    # ⚛️ React + Vite dashboard
+├── client/                    # ⚛️ React + Vite Frontend
 │   ├── src/
-│   │   ├── components/        # Reusable UI components
-│   │   ├── pages/             # Dashboard, Login, New Consultation
-│   │   └── context/           # Global state management
-│   ├── public/                # Static assets & screenshots
+│   │   ├── components/        # Navbar, ThemeToggle, ProtectedRoute, HeroSection
+│   │   ├── pages/             # Dashboard, NewConsultation, ConsultationsHistory, PatientHistory, PatientTrends
+│   │   ├── utils/             # speech.js, diarization.js, pdfGenerator.js
+│   │   └── context/           # AuthContext state management
+│   ├── public/                # Static assets & banner graphics
 │   └── package.json
 │
 └── README.md
@@ -168,8 +180,8 @@ VoiceDoc/
 ### Prerequisites
 
 - Node.js `18+`
-- MongoDB URI
-- Groq or Google Gemini API key
+- MongoDB URI (Atlas or local)
+- Groq API key (`GROQ_API_KEY`)
 
 ### 1. Clone the Repository
 
@@ -193,7 +205,10 @@ MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 GROQ_API_KEY=your_groq_key
 GEMINI_API_KEY=your_gemini_key (Optional fallback)
+FRONTEND_URL=http://localhost:5173
 ```
+
+Run the backend server:
 
 ```bash
 npm run dev
@@ -212,6 +227,8 @@ Create a `.env` file in `client/`:
 VITE_API_URL=http://localhost:5000/api
 ```
 
+Run the frontend app:
+
 ```bash
 npm run dev
 ```
@@ -220,18 +237,11 @@ npm run dev
 
 ---
 
-## 🗺️ Future Roadmap
-
-- 📱 **WhatsApp Integration**: Automatically send PDF prescriptions to patients via WhatsApp Business API.
-- 🎙️ **Multi-speaker diarization**: Distinguish between doctor and patient voices.
-
----
-
-## 👩💻 Built By
+## 👩‍💻 Built By
 
 <div align="center">
 
-**Jaanvi Chouhan**
+**Jaanvi Chouhan**  
 *B.Tech CSE · 3rd Year · Medi-Caps University, Indore*
 
 [![GitHub](https://img.shields.io/badge/GitHub-Jaanvichouhan34-181717?style=flat-square&logo=github)](https://github.com/Jaanvichouhan34)
