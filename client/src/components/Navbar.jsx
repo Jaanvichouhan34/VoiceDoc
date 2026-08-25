@@ -19,7 +19,7 @@ const Navbar = () => {
   if (!user || staticPages.includes(location.pathname)) return null;
 
   return (
-    <nav className="bg-[#0d1424] border-b border-[#1f2937] text-white shadow-md">
+    <nav className="sticky top-0 z-50 bg-[#0d1424]/95 backdrop-blur-md border-b border-[#1f2937] text-white shadow-lg transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -29,7 +29,8 @@ const Navbar = () => {
             </Link>
           </div>
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-[#9ca3af] hover:text-white font-medium text-sm">Home</Link>
+            <Link to="/dashboard" className="text-[#9ca3af] hover:text-white font-medium text-sm">Dashboard</Link>
+            <Link to="/consultations" className="text-[#9ca3af] hover:text-white font-medium text-sm">History</Link>
             <div className="hidden md:flex items-center gap-2">
               <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider">Status:</span>
               <button 
@@ -46,7 +47,9 @@ const Navbar = () => {
                 <User className="h-4 w-4 text-gray-300" />
                 <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#0d1424] transition-colors ${isActive ? 'bg-success' : 'bg-red-500'}`}></span>
               </div>
-              <span className="font-medium text-sm hidden sm:block text-gray-200">Dr. {user.name}</span>
+              <span className="font-medium text-sm hidden sm:block text-gray-200">
+                {user.name?.toLowerCase().startsWith('dr.') ? user.name : `Dr. ${user.name}`}
+              </span>
             </div>
             <button 
               onClick={handleLogout}

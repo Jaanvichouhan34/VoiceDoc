@@ -55,4 +55,31 @@ router.get('/patient/:name', auth, async (req, res) => {
   }
 });
 
+// Delete a single consultation by ID
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const consultation = await Consultation.findOneAndDelete({
+      _id: req.params.id,
+      doctor: req.user.id
+    });
+    if (!consultation) return res.status(404).json({ error: 'Consultation not found' });
+    res.json({ message: 'Consultation deleted successfully', id: req.params.id });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete all consultations for a specific patient
+router.delete('/patient/:name', auth, async (req, res) => {
+  try {
+    const result = await Consultation.deleteMany({
+      doctor: req.user.id,
+      patientName: req.params.name
+    });
+    res.json({ message: 'Patient records deleted successfully', count: result.deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

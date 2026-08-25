@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewConsultation from './pages/NewConsultation';
 import PatientHistory from './pages/PatientHistory';
+import ConsultationsHistory from './pages/ConsultationsHistory';
 import LandingPage from './pages/LandingPage';
 import LegalPage from './pages/LegalPage';
 import HowItWorks from './pages/HowItWorks';
@@ -24,6 +25,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/consultations" element={<ProtectedRoute><ConsultationsHistory /></ProtectedRoute>} />
               <Route path="/new-consultation" element={<ProtectedRoute><NewConsultation /></ProtectedRoute>} />
               <Route path="/patient/:name" element={<ProtectedRoute><PatientHistory /></ProtectedRoute>} />
               <Route path="/patient-trends/:name" element={<ProtectedRoute><PatientTrends /></ProtectedRoute>} />
