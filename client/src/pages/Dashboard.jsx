@@ -1,20 +1,57 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, FileText, PlusCircle, Calendar, Search, ArrowRight, ChevronRight, Activity } from 'lucide-react';
+import { Users, FileText, PlusCircle, Calendar, Search, ArrowRight, ChevronRight, Activity, Trash2, AlertTriangle, FileDown, ThumbsUp } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { useAuth } from '../context/AuthContext';
+import { generatePrescription } from '../utils/pdfGenerator';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "https://voicedoc-backend-wkkr.onrender.com/api";
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [consultations, setConsultations] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteName, setDeleteName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [feedbackStats, setFeedbackStats] = useState({ total: 0, percentage: 100, positive: 0, negative: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchConsultations();
+    const fetchFeedbackStats = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/feedback/stats`);
+        setFeedbackStats(res.data);
+      } catch (err) {
+        console.error("Failed to fetch feedback stats:", err);
+      }
+    };
+    fetchFeedbackStats();
   }, []);
+
+  const confirmDelete = (e, id, patientName) => {
+    e.stopPropagation();
+    setDeleteId(id);
+    setDeleteName(patientName);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setIsDeleting(true);
+      await axios.delete(`${API_BASE_URL}/consultations/${deleteId}`);
+      setConsultations(prev => prev.filter(c => c._id !== deleteId));
+      setDeleteId(null);
+      setDeleteName('');
+    } catch (err) {
+      console.error("Failed to delete consultation:", err);
+      alert("Failed to delete consultation. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const fetchConsultations = async () => {
     try {
@@ -28,14 +65,14 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (searchQuery === '') {
+    if (searchQuery.trim() === '') {
       fetchConsultations();
       return;
     }
 
     const delayDebounceFn = setTimeout(() => {
       performSearch(searchQuery);
-    }, 500);
+    }, 400);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
@@ -84,7 +121,7 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="glass-card p-6 flex items-center gap-4 hover:bg-[#1f2937]/50 transition-colors cursor-pointer group">
           <div className="bg-primary/10 p-3 rounded-xl text-primary group-hover:scale-110 transition-transform">
             <Users className="h-6 w-6" />
@@ -112,13 +149,25 @@ const Dashboard = () => {
             <p className="text-2xl font-bold text-white">{consultations.length}</p>
           </div>
         </div>
+        <div className="glass-card p-6 flex items-center gap-4 hover:bg-[#1f2937]/50 transition-colors cursor-pointer group">
+          <div className="bg-emerald-500/10 p-3 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
+            <ThumbsUp className="h-6 w-6" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[#9ca3af]">AI Accuracy</p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-2xl font-bold text-white">{feedbackStats.percentage}%</p>
+              <span className="text-xs text-[#9ca3af]">({feedbackStats.total} ratings)</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Analytics Chart */}
       <div className="glass-card p-6 mb-8">
         <h2 className="text-lg font-bold text-white mb-4">Consultation Trends</h2>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full h-64 min-h-[250px] relative">
+          <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
@@ -147,7 +196,12 @@ const Dashboard = () => {
 
       <div className="vd-card overflow-hidden">
         <div className="p-6 border-b border-[#1f2937] flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h2 className="text-lg font-bold text-white">Recent Consultations</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-white">Recent Consultations</h2>
+            <Link to="/consultations" className="text-xs font-semibold text-primary hover:underline">
+              View All History →
+            </Link>
+          </div>
           <div className="relative w-full sm:w-64">
             <input 
               type="text" 
@@ -211,12 +265,29 @@ const Dashboard = () => {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
+                      generatePrescription(consult, user);
+                    }}
+                    className="p-2 hover:bg-primary/20 rounded-full text-[#9ca3af] hover:text-primary transition-colors"
+                    title="Download Prescription PDF"
+                  >
+                    <FileDown className="h-5 w-5" />
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
                       navigate(`/patient-trends/${encodeURIComponent(consult.patientName)}`);
                     }}
                     className="p-2 hover:bg-[#374151] rounded-full text-[#9ca3af] hover:text-white transition-colors"
                     title="View Trends"
                   >
                     <Activity className="h-5 w-5" />
+                  </button>
+                  <button 
+                    onClick={(e) => confirmDelete(e, consult._id, consult.patientName)}
+                    className="p-2 hover:bg-red-500/20 rounded-full text-[#9ca3af] hover:text-red-400 transition-colors"
+                    title="Delete Consultation"
+                  >
+                    <Trash2 className="h-5 w-5" />
                   </button>
                   <ChevronRight className="h-5 w-5 text-[#9ca3af] group-hover:text-white transition-colors" />
                 </div>
@@ -225,6 +296,41 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="glass-card max-w-md w-full p-6 rounded-2xl border border-red-500/30 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-500">
+              <div className="p-3 bg-red-500/10 rounded-full border border-red-500/20">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Delete Consultation</h3>
+            </div>
+            
+            <p className="text-[#9ca3af] text-sm leading-relaxed">
+              Are you sure you want to delete the consultation record for <strong className="text-white">{deleteName}</strong>? This action cannot be undone.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => { setDeleteId(null); setDeleteName(''); }}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg bg-[#1f2937] hover:bg-[#374151] text-white font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete Permanently"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

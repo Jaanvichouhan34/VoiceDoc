@@ -71,8 +71,8 @@ const PatientTrends = () => {
               <Heart className="h-5 w-5 text-red-500" />
               Heart Rate (BPM)
             </h2>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-64 min-h-[250px] relative">
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
@@ -94,8 +94,8 @@ const PatientTrends = () => {
               <Thermometer className="h-5 w-5 text-yellow-500" />
               Temperature (°F)
             </h2>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-64 min-h-[250px] relative">
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
@@ -117,8 +117,8 @@ const PatientTrends = () => {
               <Scale className="h-5 w-5 text-green-500" />
               Weight (kg)
             </h2>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-64 min-h-[250px] relative">
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
@@ -140,8 +140,8 @@ const PatientTrends = () => {
               <Activity className="h-5 w-5 text-blue-500" />
               Systolic Blood Pressure
             </h2>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-64 min-h-[250px] relative">
+              <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
