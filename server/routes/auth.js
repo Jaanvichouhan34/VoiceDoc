@@ -3,6 +3,23 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
+const auth = require('../middleware/auth');
+
+router.get('/me', auth, async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.user.id).select('-password');
+    if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
+    res.json({
+      id: doctor.id,
+      name: doctor.name,
+      email: doctor.email,
+      specialization: doctor.specialization,
+      registrationNumber: doctor.registrationNumber
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 router.post('/register', async (req, res) => {
   try {
