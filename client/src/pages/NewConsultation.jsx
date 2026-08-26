@@ -265,10 +265,10 @@ const NewConsultation = () => {
                 {formatSpeakerDialogue(transcript).map((turn, idx) => (
                   <div 
                     key={idx}
-                    className={`p-3 rounded-xl border text-xs leading-relaxed space-y-1 ${
+                    className={`p-3.5 rounded-xl border text-xs leading-relaxed space-y-1 ${
                       turn.speaker === 'Doctor'
-                        ? 'dialogue-turn-doctor bg-blue-500/10 border-blue-500/30 text-slate-800 dark:text-blue-100 ml-2'
-                        : 'dialogue-turn-patient bg-emerald-500/10 border-emerald-500/30 text-slate-800 dark:text-emerald-100 mr-2'
+                        ? 'dialogue-turn-doctor ml-2'
+                        : 'dialogue-turn-patient mr-2'
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold text-[11px]">
