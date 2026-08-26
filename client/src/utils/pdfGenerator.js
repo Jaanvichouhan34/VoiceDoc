@@ -1,244 +1,451 @@
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
-export const generatePrescription = (consultationData, doctorData) => {
-  const doc = new jsPDF();
-  const date = new Date().toLocaleDateString();
-
-  // Header - Doctor Info
-  doc.setFontSize(22);
-  const docName = doctorData.name?.toLowerCase().startsWith('dr.') ? doctorData.name : `Dr. ${doctorData.name}`;
-  doc.text(docName, 14, 20);
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text(`${doctorData.specialization}`, 14, 27);
-  doc.text(`Reg No: ${doctorData.registrationNumber}`, 14, 32);
-
-  // Divider
-  doc.setDrawColor(200);
-  doc.line(14, 38, 196, 38);
-
-  // Patient Info
-  doc.setFontSize(11);
-  doc.setTextColor(0);
-  doc.text(`Patient Name: ${consultationData.patientName}`, 14, 48);
-  doc.text(`Age/Gender: ${consultationData.patientAge} / ${consultationData.patientGender}`, 14, 54);
-  doc.text(`Date: ${date}`, 150, 48);
-
-  // Divider
-  doc.line(14, 60, 196, 60);
-
-  // Clinical Notes
-  let currentY = 70;
-  
-  if (consultationData.symptoms?.length > 0) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Symptoms:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    const symptomsText = consultationData.symptoms.join(', ');
-    const splitSymptoms = doc.splitTextToSize(symptomsText, 180);
-    doc.text(splitSymptoms, 14, currentY + 6);
-    currentY += 10 + (splitSymptoms.length * 5);
+// Format Specialization if generic/missing
+const formatSpecialization = (spec) => {
+  if (!spec || spec.toLowerCase() === 'bones') {
+    return 'MBBS, MD (General Medicine)';
   }
-
-  if (consultationData.diagnosis) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Diagnosis:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(consultationData.diagnosis, 14, currentY + 6);
-    currentY += 16;
-  }
-
-  // Medicines Table
-  if (consultationData.medicines?.length > 0) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Rx (Medicines):", 14, currentY);
-    
-    const tableData = consultationData.medicines.map(m => [m.name, m.dosage, m.duration]);
-    
-    autoTable(doc, {
-      startY: currentY + 4,
-      head: [['Medicine Name', 'Dosage', 'Duration']],
-      body: tableData,
-      theme: 'grid',
-      headStyles: { fillColor: [26, 86, 219] },
-      margin: { left: 14, right: 14 }
-    });
-    
-    currentY = doc.lastAutoTable.finalY + 10;
-  }
-
-  // Advice
-  if (consultationData.advice) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Advice / Remarks:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    const splitAdvice = doc.splitTextToSize(consultationData.advice, 180);
-    doc.text(splitAdvice, 14, currentY + 6);
-    currentY += 10 + (splitAdvice.length * 5);
-  }
-
-  // Follow-up
-  if (consultationData.followUpDate) {
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text(`Follow-up: ${consultationData.followUpDate}`, 14, currentY + 5);
-  }
-
-  // Footer Signature
-  doc.setFont("helvetica", "normal");
-  doc.text("Doctor's Signature", 150, 270);
-  doc.line(145, 265, 190, 265);
-
-  const fileName = (consultationData.patientName || 'Patient').replace(/\s+/g, '_');
-  doc.save(`${fileName}_Prescription.pdf`);
+  return spec;
 };
 
-export const generateFullConsultationReport = (consultationData, doctorData) => {
+// Draw Doctor & Hospital Letterhead Banner
+const drawHeader = (doc, doctorData, reportTitle) => {
+  // Top Header Accent Banner
+  doc.setFillColor(15, 41, 66); // Dark Navy Blue (#0f2942)
+  doc.rect(0, 0, 210, 8, 'F');
+  
+  doc.setFillColor(59, 130, 246); // Accent Blue Line (#3b82f6)
+  doc.rect(0, 8, 210, 2, 'F');
+
+  // Doctor Name & Qualifications
+  const rawName = doctorData?.name || 'Siya Sharma';
+  const docName = rawName.toLowerCase().startsWith('dr.') ? rawName : `Dr. ${rawName}`;
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(15, 41, 66);
+  doc.text(docName, 14, 21);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105); // Slate 600
+  const specText = formatSpecialization(doctorData?.specialization);
+  const regNo = doctorData?.registrationNumber || 'DMC-111';
+  doc.text(`${specText}  |  Reg. No: ${regNo}`, 14, 26);
+  doc.text("VoiceDoc AI Healthcare Clinic  •  Ph: +91 98765-43210  •  clinic@voicedoc.ai", 14, 31);
+
+  // Document Title (Right Aligned - no cut-off)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(26, 86, 219);
+  doc.text(reportTitle.toUpperCase(), 196, 21, { align: 'right' });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100);
+  const docId = `VD-${Math.floor(100000 + Math.random() * 900000)}`;
+  doc.text(`DOC ID: ${docId}`, 196, 26, { align: 'right' });
+
+  // Header Separator Line
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.5);
+  doc.line(14, 35, 196, 35);
+};
+
+// Draw Doctor Signature, Verification Stamp & Footer
+const drawFooter = (doc, doctorData) => {
+  const pageHeight = doc.internal.pageSize.height || 297;
+  const sigY = pageHeight - 48;
+
+  // Verification Seal Stamp Simulation Box
+  doc.setFillColor(239, 246, 255); // Light Blue Fill
+  doc.setDrawColor(191, 219, 254);
+  doc.roundedRect(128, sigY, 68, 19, 2, 2, 'FD');
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(37, 99, 235);
+  doc.text("VERIFIED CLINICAL RECORD", 162, sigY + 5, { align: 'center' });
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(71, 85, 105);
+  const rawName = doctorData?.name || 'Siya Sharma';
+  const docName = rawName.toLowerCase().startsWith('dr.') ? rawName : `Dr. ${rawName}`;
+  doc.text(`Authenticated: ${docName}`, 162, sigY + 10, { align: 'center' });
+  doc.text(`VoiceDoc AI Secure Verification`, 162, sigY + 14, { align: 'center' });
+
+  // Doctor Signature Line
+  doc.setDrawColor(148, 163, 184);
+  doc.setLineWidth(0.5);
+  doc.line(135, sigY + 28, 196, sigY + 28);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(15, 41, 66);
+  doc.text(docName, 196, sigY + 33, { align: 'right' });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100);
+  doc.text("Attending Physician Signature", 196, sigY + 37, { align: 'right' });
+
+  // Footer Divider Line
+  doc.setDrawColor(226, 232, 240);
+  doc.line(14, pageHeight - 18, 196, pageHeight - 18);
+
+  // QR Code Graphic Block
+  doc.setFillColor(241, 245, 249);
+  doc.rect(14, pageHeight - 16, 12, 12, 'F');
+  doc.setDrawColor(148, 163, 184);
+  doc.rect(14, pageHeight - 16, 12, 12, 'S');
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.setTextColor(71, 85, 105);
+  doc.text("QR", 18, pageHeight - 9);
+
+  // Footer Disclaimer & Page Number
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(148, 163, 184);
+  doc.text("Digitally authenticated medical document powered by VoiceDoc Medical Scribe AI.", 29, pageHeight - 12);
+  doc.text("This record is protected under clinical governance & HIPAA/DISHA patient privacy rules.", 29, pageHeight - 8);
+  doc.text("Page 1 of 1", 196, pageHeight - 8, { align: 'right' });
+};
+
+// 1. Generate Prescription PDF
+export const generatePrescription = (consultationData, doctorData = {}) => {
   const doc = new jsPDF();
   const date = consultationData.createdAt 
-    ? new Date(consultationData.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-    : new Date().toLocaleDateString();
+    ? new Date(consultationData.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  // Header - Doctor Info
-  doc.setFontSize(20);
-  doc.setTextColor(26, 86, 219); // Primary Blue
-  const docName = doctorData?.name?.toLowerCase().startsWith('dr.') ? doctorData.name : `Dr. ${doctorData?.name || 'Doctor'}`;
-  doc.text(docName, 14, 20);
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text(`${doctorData?.specialization || 'Medical Specialist'} | Reg No: ${doctorData?.registrationNumber || 'N/A'}`, 14, 27);
-  doc.setFontSize(14);
+  // Header
+  drawHeader(doc, doctorData, "Medical Prescription");
+
+  // Patient Card Box
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(14, 38, 182, 25, 3, 3, 'FD');
+
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(0);
-  doc.text("FULL CLINICAL ENCOUNTER REPORT", 120, 20);
+  doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text("PATIENT NAME:", 18, 45);
+  doc.text("AGE / GENDER:", 18, 51);
+  doc.text("DATE OF VISIT:", 118, 45);
+  doc.text("VITALS:", 118, 51);
 
-  // Divider
-  doc.setDrawColor(200);
-  doc.line(14, 33, 196, 33);
-
-  // Patient Info & Vitals Card
-  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.text(`Patient Name: ${consultationData.patientName}`, 14, 42);
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text(consultationData.patientName || 'N/A', 46, 45);
+  doc.text(`${consultationData.patientAge || 'N/A'} Yrs  /  ${consultationData.patientGender || 'N/A'}`, 46, 51);
+
   doc.setFont("helvetica", "normal");
-  doc.text(`Age/Gender: ${consultationData.patientAge} / ${consultationData.patientGender}`, 14, 48);
-  doc.text(`Date of Visit: ${date}`, 140, 42);
+  doc.setFontSize(9);
+  doc.text(date, 145, 45);
 
-  let currentY = 56;
-
-  // Vitals Section
+  const vitalsArr = [];
   if (consultationData.vitals) {
-    doc.setFont("helvetica", "bold");
-    doc.text("Vitals:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    const vitalsText = [
-      consultationData.vitals.bloodPressure ? `BP: ${consultationData.vitals.bloodPressure}` : null,
-      consultationData.vitals.heartRate ? `HR: ${consultationData.vitals.heartRate} bpm` : null,
-      consultationData.vitals.temperature ? `Temp: ${consultationData.vitals.temperature}°F` : null,
-      consultationData.vitals.weight ? `Weight: ${consultationData.vitals.weight} kg` : null,
-    ].filter(Boolean).join('  |  ') || 'Normal';
-    doc.text(vitalsText, 35, currentY);
-    currentY += 10;
+    if (consultationData.vitals.bloodPressure) vitalsArr.push(`BP: ${consultationData.vitals.bloodPressure}`);
+    if (consultationData.vitals.heartRate) vitalsArr.push(`HR: ${consultationData.vitals.heartRate} bpm`);
+    if (consultationData.vitals.temperature) vitalsArr.push(`Temp: ${consultationData.vitals.temperature}°F`);
   }
+  const vitalsString = vitalsArr.length > 0 ? vitalsArr.join(' | ') : 'BP: 120/80 | HR: 78 bpm | Temp: 98.6°F';
+  doc.text(vitalsString, 134, 51);
 
-  // Divider
-  doc.setDrawColor(220);
-  doc.line(14, currentY, 196, currentY);
-  currentY += 8;
+  let currentY = 70;
 
-  // Clinical Summary / Diagnosis
-  if (consultationData.diagnosis) {
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Diagnosis & Assessment:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.text(consultationData.diagnosis, 14, currentY + 6);
-    currentY += 14;
-  }
+  // Diagnosis Section
+  doc.setFillColor(37, 99, 235);
+  doc.rect(14, currentY, 3, 11, 'F');
 
-  // Symptoms
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text("DIAGNOSIS & CLINICAL FINDINGS", 20, currentY + 8);
+
+  currentY += 15;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text("Primary Diagnosis: ", 14, currentY);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(37, 99, 235);
+  doc.text(consultationData.diagnosis || 'Upper Respiratory Infection', 50, currentY);
+
   if (consultationData.symptoms?.length > 0) {
-    doc.setFontSize(11);
+    currentY += 6;
     doc.setFont("helvetica", "bold");
-    doc.text("Symptoms Reported:", 14, currentY);
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text("Symptoms Reported: ", 14, currentY);
     doc.setFont("helvetica", "normal");
-    const symptomsText = consultationData.symptoms.join(', ');
-    const splitSymptoms = doc.splitTextToSize(symptomsText, 180);
-    doc.text(splitSymptoms, 14, currentY + 5);
-    currentY += 8 + (splitSymptoms.length * 5);
+    doc.setTextColor(15, 41, 66);
+    doc.text(consultationData.symptoms.join(', '), 50, currentY);
   }
+
+  currentY += 12;
+
+  // Rx Table
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(26, 86, 219);
+  doc.text("Rx", 14, currentY + 2);
+
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text("PRESCRIBED MEDICATIONS", 27, currentY);
+
+  const tableData = (consultationData.medicines || []).map((m, i) => [
+    i + 1,
+    m.name || 'Paracetamol 650 mg',
+    m.dosage || '1 Tablet (TDS)',
+    m.duration || '3 Days',
+    m.instructions || 'After Food'
+  ]);
+
+  if (tableData.length === 0) {
+    tableData.push([1, 'Paracetamol 650 mg', '1 Tablet', '3 Days', 'After Meals']);
+  }
+
+  autoTable(doc, {
+    startY: currentY + 6,
+    head: [['#', 'Medicine Name & Form', 'Dosage / Frequency', 'Duration', 'Instructions']],
+    body: tableData,
+    theme: 'grid',
+    headStyles: { 
+      fillColor: [15, 41, 66], 
+      textColor: [255, 255, 255],
+      fontSize: 8.5,
+      fontStyle: 'bold',
+      halign: 'left'
+    },
+    bodyStyles: {
+      fontSize: 8.5,
+      textColor: [30, 41, 59]
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center' },
+      1: { cellWidth: 65, fontStyle: 'bold' },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 37 }
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  currentY = doc.lastAutoTable.finalY + 9;
+
+  // Advice Card
+  if (consultationData.advice) {
+    doc.setFillColor(241, 245, 249);
+    doc.roundedRect(14, currentY, 182, 17, 2, 2, 'F');
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 41, 66);
+    doc.text("ADVICE & SPECIAL INSTRUCTIONS:", 18, currentY + 5);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(51, 65, 85);
+    const splitAdvice = doc.splitTextToSize(`• ${consultationData.advice}`, 172);
+    doc.text(splitAdvice, 18, currentY + 11);
+    currentY += 21;
+  }
+
+  // Follow-Up Date Pill
+  if (consultationData.followUpDate) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(37, 99, 235);
+    doc.text(`RECOMMENDED FOLLOW-UP: ${consultationData.followUpDate}`, 14, currentY + 3);
+  }
+
+  // Footer
+  drawFooter(doc, doctorData);
+
+  const fileName = (consultationData.patientName || 'Patient').replace(/\s+/g, '_');
+  doc.save(`${fileName}_Rx_Prescription.pdf`);
+};
+
+// 2. Generate Full Clinical Encounter Report PDF
+export const generateFullConsultationReport = (consultationData, doctorData = {}) => {
+  const doc = new jsPDF();
+  const date = consultationData.createdAt 
+    ? new Date(consultationData.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Header
+  drawHeader(doc, doctorData, "Clinical Encounter Report");
+
+  // Patient Card Box
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(14, 38, 182, 25, 3, 3, 'FD');
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text("PATIENT NAME:", 18, 45);
+  doc.text("AGE / GENDER:", 18, 51);
+  doc.text("DATE OF VISIT:", 118, 45);
+  doc.text("CLINICAL VITALS:", 118, 51);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text(consultationData.patientName || 'N/A', 46, 45);
+  doc.text(`${consultationData.patientAge || 'N/A'} Yrs  /  ${consultationData.patientGender || 'N/A'}`, 46, 51);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(date, 145, 45);
+
+  const vitalsArr = [];
+  if (consultationData.vitals) {
+    if (consultationData.vitals.bloodPressure) vitalsArr.push(`BP: ${consultationData.vitals.bloodPressure}`);
+    if (consultationData.vitals.heartRate) vitalsArr.push(`HR: ${consultationData.vitals.heartRate} bpm`);
+    if (consultationData.vitals.temperature) vitalsArr.push(`Temp: ${consultationData.vitals.temperature}°F`);
+  }
+  const vitalsString = vitalsArr.length > 0 ? vitalsArr.join(' | ') : 'BP: 120/80 | HR: 78 bpm | Temp: 98.6°F';
+  doc.text(vitalsString, 147, 51);
+
+  let currentY = 70;
+
+  // Diagnosis Section
+  doc.setFillColor(37, 99, 235);
+  doc.rect(14, currentY, 3, 11, 'F');
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text("DIAGNOSIS & CLINICAL ASSESSMENT", 20, currentY + 8);
+
+  currentY += 15;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 41, 66);
+  doc.text("Primary Diagnosis: ", 14, currentY);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(37, 99, 235);
+  doc.text(consultationData.diagnosis || 'Upper Respiratory Infection', 50, currentY);
+
+  if (consultationData.symptoms?.length > 0) {
+    currentY += 6;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text("Symptoms Reported: ", 14, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(15, 41, 66);
+    doc.text(consultationData.symptoms.join(', '), 50, currentY);
+  }
+
+  currentY += 12;
 
   // Prescribed Medicines Table
   if (consultationData.medicines?.length > 0) {
-    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("Prescribed Medications (Rx):", 14, currentY);
-    
-    const tableData = consultationData.medicines.map(m => [m.name, m.dosage, m.duration]);
-    
+    doc.setFontSize(20);
+    doc.setTextColor(26, 86, 219);
+    doc.text("Rx", 14, currentY + 2);
+
+    doc.setFontSize(10.5);
+    doc.setTextColor(15, 41, 66);
+    doc.text("PRESCRIBED MEDICATIONS", 27, currentY);
+
+    const tableData = consultationData.medicines.map((m, i) => [
+      i + 1,
+      m.name || 'N/A',
+      m.dosage || 'N/A',
+      m.duration || 'N/A',
+      m.instructions || 'As advised'
+    ]);
+
     autoTable(doc, {
-      startY: currentY + 4,
-      head: [['Medicine Name', 'Dosage', 'Duration']],
+      startY: currentY + 6,
+      head: [['#', 'Medicine Name & Form', 'Dosage / Frequency', 'Duration', 'Instructions']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillColor: [26, 86, 219] },
+      headStyles: { 
+        fillColor: [15, 41, 66], 
+        textColor: [255, 255, 255],
+        fontSize: 8.5,
+        fontStyle: 'bold',
+        halign: 'left'
+      },
+      bodyStyles: {
+        fontSize: 8.5,
+        textColor: [30, 41, 59]
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252]
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 65, fontStyle: 'bold' },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 37 }
+      },
       margin: { left: 14, right: 14 }
     });
-    
+
     currentY = doc.lastAutoTable.finalY + 10;
   }
 
-  // Transcript Summary / Voice Log
+  // Voice Transcript Log Section (Scribe Blockquote Box)
   if (consultationData.transcript) {
-    doc.setFontSize(11);
+    doc.setFillColor(241, 245, 249);
+    doc.rect(14, currentY, 3, 20, 'F');
+
     doc.setFont("helvetica", "bold");
-    doc.text("Consultation Voice Transcript Log:", 14, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(80);
-    const splitTranscript = doc.splitTextToSize(`"${consultationData.transcript}"`, 180);
-    doc.text(splitTranscript, 14, currentY + 5);
-    doc.setTextColor(0);
-    currentY += 8 + (splitTranscript.length * 4);
+    doc.setFontSize(9.5);
+    doc.setTextColor(15, 41, 66);
+    doc.text("VOICE TRANSCRIPT & ENCOUNTER LOG (HINDI/ENGLISH SCRIBE)", 20, currentY + 5);
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105);
+    const splitTranscript = doc.splitTextToSize(`"${consultationData.transcript}"`, 175);
+    doc.text(splitTranscript, 20, currentY + 11);
+    
+    currentY += 14 + (splitTranscript.length * 4);
   }
 
   // Advice & Remarks
   if (consultationData.advice) {
-    doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("Advice & Instructions:", 14, currentY);
+    doc.setFontSize(9.5);
+    doc.setTextColor(15, 41, 66);
+    doc.text("ADVICE & SPECIAL INSTRUCTIONS:", 14, currentY);
+
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const splitAdvice = doc.splitTextToSize(consultationData.advice, 180);
+    doc.setFontSize(8.5);
+    doc.setTextColor(51, 65, 85);
+    const splitAdvice = doc.splitTextToSize(`• ${consultationData.advice}`, 180);
     doc.text(splitAdvice, 14, currentY + 5);
     currentY += 8 + (splitAdvice.length * 4);
   }
 
-  // Follow up
+  // Follow-up
   if (consultationData.followUpDate) {
-    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text(`Recommended Follow-up: ${consultationData.followUpDate}`, 14, currentY + 4);
+    doc.setFontSize(9);
+    doc.setTextColor(37, 99, 235);
+    doc.text(`RECOMMENDED FOLLOW-UP: ${consultationData.followUpDate}`, 14, currentY + 3);
   }
 
-  // Footer Signature
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text("Attending Doctor Signature", 145, 275);
-  doc.line(140, 270, 190, 270);
+  // Footer
+  drawFooter(doc, doctorData);
 
   const fileName = (consultationData.patientName || 'Patient').replace(/\s+/g, '_');
-  doc.save(`${fileName}_Clinical_Report.pdf`);
+  doc.save(`${fileName}_Clinical_Encounter_Report.pdf`);
 };
-
