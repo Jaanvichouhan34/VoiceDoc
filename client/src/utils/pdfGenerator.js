@@ -152,6 +152,8 @@ export const generatePrescription = (consultationData, doctorData = {}) => {
     if (consultationData.vitals.bloodPressure) vitalsArr.push(`BP: ${consultationData.vitals.bloodPressure}`);
     if (consultationData.vitals.heartRate) vitalsArr.push(`HR: ${consultationData.vitals.heartRate} bpm`);
     if (consultationData.vitals.temperature) vitalsArr.push(`Temp: ${consultationData.vitals.temperature}°F`);
+    if (consultationData.vitals.bloodSugar) vitalsArr.push(`RBS: ${consultationData.vitals.bloodSugar}`);
+    if (consultationData.vitals.spO2) vitalsArr.push(`SpO2: ${consultationData.vitals.spO2}%`);
   }
   const vitalsString = vitalsArr.length > 0 ? vitalsArr.join(' | ') : 'BP: 120/80 | HR: 78 bpm | Temp: 98.6°F';
   doc.text(vitalsString, 134, 51);
@@ -313,6 +315,8 @@ export const generateFullConsultationReport = (consultationData, doctorData = {}
     if (consultationData.vitals.bloodPressure) vitalsArr.push(`BP: ${consultationData.vitals.bloodPressure}`);
     if (consultationData.vitals.heartRate) vitalsArr.push(`HR: ${consultationData.vitals.heartRate} bpm`);
     if (consultationData.vitals.temperature) vitalsArr.push(`Temp: ${consultationData.vitals.temperature}°F`);
+    if (consultationData.vitals.bloodSugar) vitalsArr.push(`RBS: ${consultationData.vitals.bloodSugar}`);
+    if (consultationData.vitals.spO2) vitalsArr.push(`SpO2: ${consultationData.vitals.spO2}%`);
   }
   const vitalsString = vitalsArr.length > 0 ? vitalsArr.join(' | ') : 'BP: 120/80 | HR: 78 bpm | Temp: 98.6°F';
   doc.text(vitalsString, 147, 51);

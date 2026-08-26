@@ -15,7 +15,9 @@ const consultationSchema = new mongoose.Schema({
     bloodPressure: String,
     heartRate: Number,
     temperature: Number,
-    weight: Number
+    weight: Number,
+    bloodSugar: String,
+    spO2: Number
   },
   symptoms: [String],
   diagnosis: String,

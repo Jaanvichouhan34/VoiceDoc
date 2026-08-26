@@ -87,9 +87,10 @@ const NewConsultation = () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/ai/analyze`, { transcript });
       setStructuredData(res.data);
-      if (res.data.symptoms && res.data.symptoms.length > 0) {
-        getAiSuggestions(res.data.symptoms);
-      }
+      const symptomsPayload = (res.data.symptoms && res.data.symptoms.length > 0)
+        ? res.data.symptoms
+        : [res.data.diagnosis || "General Symptoms"];
+      getAiSuggestions(symptomsPayload);
     } catch (err) {
       console.error("AI Analysis Technical Error:", err);
       setAnalysisError(true);
@@ -424,7 +425,7 @@ const NewConsultation = () => {
 
                 <div className="border-l-[3px] border-blue-500 pl-4">
                   <h3 className="text-sm font-bold text-[#9ca3af] uppercase tracking-wider mb-2">Vitals</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
                     <div>
                       <label className="text-xs text-[#9ca3af]">BP</label>
                       <input
@@ -462,6 +463,32 @@ const NewConsultation = () => {
                         })}
                         className="vd-input py-1.5 px-3 text-sm w-full"
                         placeholder="98.6"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">Blood Sugar (RBS)</label>
+                      <input
+                        type="text"
+                        value={structuredData.vitals?.bloodSugar || ''}
+                        onChange={(e) => setStructuredData({
+                          ...structuredData,
+                          vitals: { ...(structuredData.vitals || {}), bloodSugar: e.target.value }
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="178 mg/dL"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#9ca3af]">SpO2 (%)</label>
+                      <input
+                        type="number"
+                        value={structuredData.vitals?.spO2 || ''}
+                        onChange={(e) => setStructuredData({
+                          ...structuredData,
+                          vitals: { ...(structuredData.vitals || {}), spO2: e.target.value }
+                        })}
+                        className="vd-input py-1.5 px-3 text-sm w-full"
+                        placeholder="98"
                       />
                     </div>
                     <div>
