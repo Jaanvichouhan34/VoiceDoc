@@ -225,24 +225,80 @@
 }
 
 .light .glass-card {
-  background: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
   border-color: rgba(226, 232, 240, 0.8) !important;
   color: #0f172a !important;
 }
 
+/* Light Mode Overrides for App Navbar & Landing Navbar */
+.light .app-navbar,
 .light .landing-navbar {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(226, 232, 240, 0.8) !important;
-}
-
-.light .landing-navbar a, .light .landing-navbar span {
-  color: #334155 !important;
-}
-
-.light .landing-navbar a:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
   color: #0f172a !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
 }
 
+.light .app-navbar .brand-text,
+.light .landing-navbar span.text-white,
+.light .landing-navbar a.text-white,
 .light .landing-navbar .text-white {
   color: #0f172a !important;
 }
+
+.light .app-navbar .nav-link,
+.light .landing-navbar a {
+  color: #475569 !important;
+}
+
+.light .app-navbar .nav-link:hover,
+.light .landing-navbar a:hover {
+  color: #0284c7 !important;
+  background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+.light .app-navbar .nav-link.text-primary,
+.light .app-navbar .nav-link.font-semibold {
+  color: #0284c7 !important;
+  background-color: rgba(2, 132, 199, 0.12) !important;
+}
+
+.light .app-navbar .status-label {
+  color: #64748b !important;
+}
+
+.light .app-navbar .nav-user-pill,
+.light .app-navbar .nav-btn-secondary,
+.light .landing-navbar .border-\[\#374151\] {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+.light .app-navbar .nav-btn-secondary:hover,
+.light .landing-navbar .hover\:bg-\[\#1f2937\]:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.light .app-navbar .user-name,
+.light .app-navbar .user-icon,
+.light .app-navbar .text-gray-200,
+.light .app-navbar .text-gray-300 {
+  color: #1e293b !important;
+}
+
+.light .app-navbar-mobile,
+.light .landing-navbar .md\:hidden {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .theme-toggle-btn {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+.light .theme-toggle-btn:hover {
+  background-color: #e2e8f0 !important;
+}
+
