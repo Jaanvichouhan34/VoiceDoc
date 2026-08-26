@@ -260,14 +260,14 @@ const NewConsultation = () => {
             </div>
 
             {viewMode === 'dialogue' && transcript.trim() ? (
-              <div className="space-y-3 max-h-64 overflow-y-auto p-3 bg-[#0a0f1e] rounded-xl border border-[#1f2937]">
+              <div className="space-y-3 max-h-64 overflow-y-auto p-3 bg-[#0a0f1e] rounded-xl border border-[#1f2937] dialogue-container">
                 {formatSpeakerDialogue(transcript).map((turn, idx) => (
                   <div 
                     key={idx}
                     className={`p-3 rounded-xl border text-xs leading-relaxed space-y-1 ${
                       turn.speaker === 'Doctor'
-                        ? 'bg-blue-500/10 border-blue-500/30 text-blue-100 ml-2'
-                        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-100 mr-2'
+                        ? 'dialogue-turn-doctor bg-blue-500/10 border-blue-500/30 text-slate-800 dark:text-blue-100 ml-2'
+                        : 'dialogue-turn-patient bg-emerald-500/10 border-emerald-500/30 text-slate-800 dark:text-emerald-100 mr-2'
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold text-[11px]">
@@ -277,11 +277,12 @@ const NewConsultation = () => {
                       </span>
                       <span className="text-[#9ca3af] text-[10px]">Turn #{idx + 1}</span>
                     </div>
-                    <p className="font-sans text-xs">{turn.text}</p>
+                    <p className="font-sans text-xs dialogue-text font-medium">{turn.text}</p>
                   </div>
                 ))}
               </div>
             ) : (
+
               <textarea 
                 value={transcript}
                 onChange={e => setTranscript(e.target.value)}

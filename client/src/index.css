@@ -302,3 +302,27 @@
   background-color: #e2e8f0 !important;
 }
 
+/* Light Mode Dialogue Text Contrast Fix */
+.light .dialogue-container {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .dialogue-turn-doctor {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+.light .dialogue-turn-patient {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.light .dialogue-text,
+.light .dialogue-turn-doctor p,
+.light .dialogue-turn-patient p {
+  color: #0f172a !important;
+  font-weight: 500 !important;
+}
+
+
