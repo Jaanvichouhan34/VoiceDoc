@@ -96,31 +96,81 @@ const Dashboard = () => {
     return date.toDateString() === today.toDateString();
   }).length;
 
-  // Aggregate consultations by date for the chart
+  const [chartTimeRange, setChartTimeRange] = useState('7d'); // '7d', '30d', 'all'
+  const [selectedDiagnosisFilter, setSelectedDiagnosisFilter] = useState('All');
+
+  // Filter consultations for search and diagnosis
+  const filteredConsultations = consultations.filter(c => {
+    const matchesSearch = !searchQuery.trim() || 
+      c.patientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.diagnosis?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesDiagnosis = selectedDiagnosisFilter === 'All' || 
+      c.diagnosis?.toLowerCase().includes(selectedDiagnosisFilter.toLowerCase());
+
+    return matchesSearch && matchesDiagnosis;
+  });
+
+  // Aggregate consultations by date for chart with time range filter
   const consultationsByDate = consultations.reduce((acc, c) => {
     const date = new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     acc[date] = (acc[date] || 0) + 1;
     return acc;
   }, {});
 
-  const chartData = Object.entries(consultationsByDate).map(([date, count]) => ({
+  let chartEntries = Object.entries(consultationsByDate).map(([date, count]) => ({
     date,
     count
-  })).reverse().slice(-7); // Last 7 days with data, reversed for chronological order
+  })).reverse();
+
+  if (chartTimeRange === '7d') {
+    chartEntries = chartEntries.slice(-7);
+  } else if (chartTimeRange === '30d') {
+    chartEntries = chartEntries.slice(-30);
+  }
+
+  const chartData = chartEntries;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+      {/* Dashboard Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-[#9ca3af]">Welcome back! Here's your clinic overview.</p>
+          <h1 className="text-2xl font-bold text-white">Clinic Dashboard</h1>
+          <p className="text-[#9ca3af]">Welcome back! Here is your AI consultation & patient overview.</p>
         </div>
-        <Link to="/new-consultation" className="vd-btn-gradient px-4 py-2 font-medium flex items-center gap-2 shadow-sm">
-          <PlusCircle className="h-5 w-5" />
-          New Consultation
-        </Link>
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          <Link to="/new-consultation" className="vd-btn-gradient px-4 py-2.5 font-bold flex items-center gap-2 shadow-md text-sm">
+            <PlusCircle className="h-4 w-4" />
+            + New Voice Consultation
+          </Link>
+        </div>
       </div>
 
+      {/* Quick Action Shortcuts Bar */}
+      <div className="flex flex-wrap items-center gap-2 mb-8 p-3 glass-card rounded-xl border border-white/10">
+        <span className="text-xs font-bold text-[#9ca3af] uppercase tracking-wider px-2">Quick Shortcuts:</span>
+        <Link to="/new-consultation" className="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-semibold flex items-center gap-1.5 transition-all">
+          🎙️ Start AI Scribe
+        </Link>
+        <Link to="/consultations" className="px-3 py-1.5 rounded-lg bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 text-xs font-semibold flex items-center gap-1.5 transition-all">
+          📋 Master History
+        </Link>
+        <button 
+          onClick={() => {
+            if (consultations.length > 0) {
+              navigate(`/patient-trends/${encodeURIComponent(consultations[0].patientName)}`);
+            } else {
+              alert("No consultations available for trends yet.");
+            }
+          }}
+          className="px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 text-xs font-semibold flex items-center gap-1.5 transition-all"
+        >
+          📈 Patient Analytics
+        </button>
+      </div>
+
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="glass-card p-6 flex items-center gap-4 hover:bg-[#1f2937]/50 transition-colors cursor-pointer group">
           <div className="bg-primary/10 p-3 rounded-xl text-primary group-hover:scale-110 transition-transform">
@@ -154,7 +204,7 @@ const Dashboard = () => {
             <ThumbsUp className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-[#9ca3af]">AI Accuracy</p>
+            <p className="text-sm font-medium text-[#9ca3af]">AI Scribe Accuracy</p>
             <div className="flex items-baseline gap-1.5">
               <p className="text-2xl font-bold text-white">{feedbackStats.percentage}%</p>
               <span className="text-xs text-[#9ca3af]">({feedbackStats.total} ratings)</span>
@@ -163,9 +213,34 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Analytics Chart */}
+      {/* Analytics Chart with Range Filter */}
       <div className="glass-card p-6 mb-8">
-        <h2 className="text-lg font-bold text-white mb-4">Consultation Trends</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Activity className="h-5 w-5 text-primary" />
+            Consultation Trends
+          </h2>
+          <div className="flex items-center gap-1 bg-[#1f2937] p-1 rounded-lg border border-[#374151]">
+            {[
+              { label: 'Last 7 Days', value: '7d' },
+              { label: 'Last 30 Days', value: '30d' },
+              { label: 'All History', value: 'all' },
+            ].map((range) => (
+              <button
+                key={range.value}
+                onClick={() => setChartTimeRange(range.value)}
+                className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
+                  chartTimeRange === range.value
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-[#9ca3af] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="w-full h-64 min-h-[250px] relative">
           <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
             <AreaChart data={chartData}>
@@ -205,7 +280,7 @@ const Dashboard = () => {
           <div className="relative w-full sm:w-64">
             <input 
               type="text" 
-              placeholder="Search patients..." 
+              placeholder="Search patient name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="vd-input w-full pl-10 pr-4 py-2"
@@ -213,18 +288,19 @@ const Dashboard = () => {
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-[#9ca3af]" />
           </div>
         </div>
+
         
         {loading ? (
           <div className="p-8 text-center text-[#9ca3af]">Loading...</div>
-        ) : consultations.length === 0 ? (
+        ) : filteredConsultations.length === 0 ? (
           <div className="p-12 text-center text-[#9ca3af] flex flex-col items-center">
             <div className="bg-[#1f2937] p-4 rounded-full mb-4">
               <FileText className="h-12 w-12 text-[#4b5563]" />
             </div>
-            {searchQuery ? (
+            {searchQuery || selectedDiagnosisFilter !== 'All' ? (
               <>
                 <h3 className="text-xl font-bold text-white mb-2">No results found</h3>
-                <p className="max-w-md">We couldn't find any consultations matching "{searchQuery}". Try a different search term.</p>
+                <p className="max-w-md">We couldn't find any consultations matching your filter criteria. Try clearing search or filters.</p>
               </>
             ) : (
               <>
@@ -239,7 +315,8 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="space-y-4 p-6">
-            {consultations.map(consult => (
+            {filteredConsultations.map(consult => (
+
               <div 
                 key={consult._id} 
                 className="p-6 glass-card hover:bg-[#1f2937]/50 transition-all duration-200 hover:-translate-y-1 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group"
